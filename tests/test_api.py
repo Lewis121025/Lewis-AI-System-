@@ -1,3 +1,5 @@
+"""FastAPI 接口测试：验证鉴权与任务生命周期。"""
+
 import os
 
 import pytest
@@ -20,6 +22,8 @@ from app.main import create_app
 
 
 class DummyStorage:
+    """用于 API 测试的对象存储替身。"""
+
     def ensure_bucket(self):
         return None
 

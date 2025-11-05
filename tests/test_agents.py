@@ -1,3 +1,5 @@
+"""智能体层单元测试，验证感知/规划/执行等核心行为。"""
+
 import os
 
 import pytest
@@ -16,6 +18,8 @@ from app.config import reset_settings_cache
 
 
 class DummyStorage:
+    """测试替身：模拟对象存储，避免真实外部依赖。"""
+
     def __init__(self):
         self.data = {}
 

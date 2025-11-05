@@ -1,4 +1,4 @@
-"""Writer agent executes plans and generates tangible outputs."""
+"""Writer（执行）智能体：根据计划编写代码或文本，并可在沙箱中验证。"""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from app.infrastructure.storage import ObjectStorageClient
 
 
 class WriterAgent(Agent):
-    """Produce code or content to satisfy plan steps."""
+    """负责将规划后的步骤转化为具体实现结果。"""
 
     def __init__(
         self,

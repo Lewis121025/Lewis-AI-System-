@@ -1,4 +1,4 @@
-"""Database session management utilities."""
+"""数据库会话管理工具，封装 Engine/Session 与初始化逻辑。"""
 
 from __future__ import annotations
 

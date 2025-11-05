@@ -1,4 +1,4 @@
-"""Redis-backed task queue helpers using RQ."""
+"""Redis 任务队列工具（基于 RQ），负责任务入队与状态查询。"""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Critic agent evaluates outputs and provides feedback."""
+"""Critic（点评）智能体：评估整体输出质量并给出反馈。"""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from app.agents.llm_proxy import LLMProxy, LLMRequest
 
 
 class CriticAgent(Agent):
-    """Assess quality of agent outputs."""
+    """负责在流程末端进行质量把控，并可提示改进建议。"""
 
     def __init__(self, llm_proxy: LLMProxy) -> None:
         super().__init__("Critic")

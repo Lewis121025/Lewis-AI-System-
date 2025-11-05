@@ -1,4 +1,4 @@
-"""ToolSmith agent creates utilities on demand."""
+"""ToolSmith（工具匠）智能体：按需生成并验证辅助工具函数。"""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from app.infrastructure.storage import ObjectStorageClient
 
 
 class ToolSmithAgent(Agent):
-    """Generate and validate helper tools in the sandbox."""
+    """负责动态产出可重复使用的工具代码，并在沙箱中进行测试。"""
 
     def __init__(
         self,

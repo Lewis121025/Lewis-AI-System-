@@ -1,4 +1,4 @@
-"""ArtDirector agent handles visual or illustrative tasks."""
+"""ArtDirector（视觉）智能体：生成图像描述或简单图表。"""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from app.infrastructure.storage import ObjectStorageClient
 
 
 class ArtDirectorAgent(Agent):
-    """Generate diagrams or visual descriptions."""
+    """负责处理与视觉相关的任务，如输出视觉简报或绘制图表。"""
 
     def __init__(self, llm_proxy: LLMProxy, storage: ObjectStorageClient) -> None:
         super().__init__("ArtDirector")

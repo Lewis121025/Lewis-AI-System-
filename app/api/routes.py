@@ -1,4 +1,4 @@
-"""API router definitions for the FastAPI layer."""
+"""FastAPI 路由定义：提供任务管理的 REST 与 WebSocket 接口。"""
 
 from __future__ import annotations
 
@@ -90,6 +90,7 @@ async def get_task_events(
 
 @router.websocket("/ws/tasks/{task_id}")
 async def task_events_socket(websocket: WebSocket, task_id: str) -> None:
+    """任务事件 WebSocket：用于从前端实时拉取事件日志。"""
     settings = get_settings()
     token = websocket.headers.get("authorization", "")
     if token != f"Bearer {settings.api_token}":

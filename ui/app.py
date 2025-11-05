@@ -1,7 +1,5 @@
-"""
-Streamlit command center for Lewis's First Project.
-
-Provides a unified UI to trigger orchestrator tasks and monitor progress.
+"""Streamlit 指挥中心界面。
+说明如何发起任务、轮询状态并展示事件日志。
 """
 
 from __future__ import annotations
@@ -25,10 +23,12 @@ if "active_task" not in st.session_state:
 
 
 def api_headers(token: str) -> Dict[str, str]:
+    """拼装 API 请求头，附带令牌（若输入）。"""
     return {"Authorization": f"Bearer {token}"} if token else {}
 
 
 def create_task(api_url: str, token: str, goal: str, name: str, sync: bool) -> Dict[str, Any]:
+    """调用后端创建任务，可以根据 sync 参数决定是否阻塞执行。"""
     response = requests.post(
         f"{api_url}/tasks",
         json={"goal": goal, "name": name or None, "sync": sync},
@@ -40,12 +40,14 @@ def create_task(api_url: str, token: str, goal: str, name: str, sync: bool) -> D
 
 
 def fetch_status(api_url: str, token: str, task_id: str) -> Dict[str, Any]:
+    """轮询任务状态，返回编排器记录的进度信息。"""
     response = requests.get(f"{api_url}/tasks/{task_id}", headers=api_headers(token), timeout=30)
     response.raise_for_status()
     return response.json()
 
 
 def fetch_events(api_url: str, token: str, task_id: str) -> List[Dict[str, Any]]:
+    """获取任务事件流，展示每个步骤的执行情况与返回数据。"""
     response = requests.get(
         f"{api_url}/tasks/{task_id}/events",
         headers=api_headers(token),

@@ -1,4 +1,4 @@
-"""Observability helpers for logging and tracing."""
+"""可观测性工具：统一配置结构化日志与 OpenTelemetry 追踪。"""
 
 from __future__ import annotations
 
@@ -11,12 +11,15 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import (
-    BatchSpanProcessor,
-    ConsoleSpanExporter,
-    OTLPSpanExporter,
-)
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from pythonjsonlogger import jsonlogger
+
+try:  # OTLP exporter位置在 1.18+ 中变更
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+        OTLPSpanExporter,
+    )
+except ImportError:  # pragma: no cover - 兼容旧版本
+    from opentelemetry.exporter.otlp.trace_exporter import OTLPSpanExporter  # type: ignore
 
 from app.config import get_settings
 

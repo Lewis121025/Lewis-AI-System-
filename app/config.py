@@ -1,24 +1,47 @@
-"""Application configuration management built on Pydantic settings."""
+"""应用配置管理模块（基于 Pydantic Settings）。
+
+This module centralises runtime configuration for the three-layer AI system.
+同时提供中文注释，便于快速理解各字段的用途。
+"""
 
 from functools import lru_cache
 from typing import Optional
 
-from pydantic import BaseSettings, Field, validator
+from pydantic import Field, validator
+
+try:
+    # Pydantic v2 style configuration (optional dependency).
+    from pydantic_settings import BaseSettings  # type: ignore
+except ModuleNotFoundError:
+    # Fallback for Pydantic v1 environments where BaseSettings lives in pydantic.
+    from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Centralized configuration for the three-layer AI system."""
+    """三层智能系统的集中配置。
 
-    api_host: str = Field("0.0.0.0", description="FastAPI binding host")
-    api_port: int = Field(8000, description="FastAPI binding port")
+    各字段可以通过环境变量或 `.env` 文件覆盖，具体说明如下：
+    - api_host / api_port：FastAPI 服务监听的地址与端口。
+    - api_token：对外暴露接口的访问令牌，用于简单鉴权。
+    - database_url：PostgreSQL（或 SQLite 等）连接串，需支持 pgvector。
+    - redis_url：Redis 任务队列连接地址。
+    - openrouter/openai 等密钥：供 LLMProxy 路由调用。
+    - sandbox_*：沙箱执行的基础配置，如超时时间、Python 解释器等。
+    """
+
+    api_host: str = Field("127.0.0.1", description="FastAPI binding host")
+    api_port: int = Field(8001, description="FastAPI binding port")
     api_token: str = Field(
         "change-me",
-        description="Bearer token for authenticating API/UI interactions.",
+        description=(
+            "Bearer token for authenticating API/UI interactions. "
+            "接口访问令牌，生产环境请务必替换。"
+        ),
     )
 
     database_url: str = Field(
         "postgresql+psycopg2://postgres:postgres@localhost:5432/lewis",
-        description="SQLAlchemy connection string for PostgreSQL + pgvector.",
+        description="SQLAlchemy connection string for PostgreSQL + pgvector. PostgreSQL 连接 URL。",
     )
     enable_db_echo: bool = Field(
         False, description="Toggle SQL echo for debugging SQLAlchemy sessions."
@@ -33,7 +56,7 @@ class Settings(BaseSettings):
 
     otlp_endpoint: Optional[str] = Field(
         None,
-        description="OTLP endpoint for exporting OpenTelemetry traces/metrics.",
+        description="OTLP endpoint for exporting OpenTelemetry traces/metrics. 遥测数据上报地址。",
     )
     log_level: str = Field(
         "INFO",
@@ -67,9 +90,20 @@ class Settings(BaseSettings):
     gemini_api_key: Optional[str] = Field(
         None, description="API key for Google Gemini endpoints."
     )
+    openrouter_api_key: Optional[str] = Field(
+        None, description="API key for OpenRouter aggregation platform."
+    )
+    openrouter_base_url: str = Field(
+        "https://openrouter.ai/api/v1",
+        description="Base URL for OpenRouter API requests.",
+    )
+    openrouter_default_model: str = Field(
+        "meta-llama/llama-4-maverick:free",
+        description="Default OpenRouter model identifier.",
+    )
 
     sandbox_timeout_seconds: int = Field(
-        30, description="Execution timeout for sandboxed code invocation."
+        30, description="Execution timeout for sandboxed code invocation. 沙箱执行超时时间（秒）。"
     )
     sandbox_python: str = Field(
         "python", description="Python executable used for sandbox subprocess."
@@ -87,7 +121,7 @@ class Settings(BaseSettings):
 
     @validator("api_token")
     def validate_api_token(cls, value: str) -> str:
-        """Ensure API token is not left at its placeholder value."""
+        """确保 API Token 非空。若仍为默认值则返回原值并在文档提醒替换。"""
         if not value or value == "change-me":
             return value
         return value.strip()
@@ -95,7 +129,7 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """Return a cached Settings instance."""
+    """返回带缓存的配置实例，避免重复读取 .env/环境变量。"""
     return Settings()
 
 
@@ -103,7 +137,7 @@ settings = get_settings()
 
 
 def reset_settings_cache() -> None:
-    """Reset cached settings (useful for tests)."""
+    """重置配置缓存（测试场景常用，重新读取最新环境变量）。"""
     global settings
     get_settings.cache_clear()
     settings = get_settings()

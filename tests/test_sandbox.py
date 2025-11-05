@@ -1,3 +1,5 @@
+"""沙箱模块测试：确保代码执行受限且按时结束"""
+
 import sys
 
 from app.agents.sandbox import Sandbox

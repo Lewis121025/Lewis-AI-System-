@@ -1,4 +1,4 @@
-"""MinIO/S3 object storage helpers."""
+"""MinIO/S3 对象存储辅助模块，封装上传/下载与签名 URL。"""
 
 from __future__ import annotations
 

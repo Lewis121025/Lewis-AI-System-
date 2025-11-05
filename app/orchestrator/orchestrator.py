@@ -1,4 +1,4 @@
-"""Task orchestrator coordinating agents across the three-layer system."""
+"""任务编排器：贯穿三层架构，协调整个智能体工作流。"""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TaskOrchestrator:
-    """Coordinates task execution across perception, planning, and agents."""
+    """协调感知、规划、执行等智能体的任务编排核心。"""
 
     def __init__(
         self,
@@ -98,7 +98,7 @@ class TaskOrchestrator:
             raise RuntimeError(f"Task {task_id} not found.")
 
         goal = record.goal
-        metadata = record.metadata or {}
+        metadata = record.meta or {}
         self._update_task_status(task_id, TaskStatus.RUNNING, started_at=datetime.utcnow())
 
         try:
@@ -284,7 +284,7 @@ class TaskOrchestrator:
                 task_id=task_id,
                 name=name,
                 goal=goal,
-                metadata=metadata,
+                meta=metadata,
                 status=TaskStatus.PENDING,
             )
             session.add(record)

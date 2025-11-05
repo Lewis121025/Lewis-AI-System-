@@ -1,4 +1,4 @@
-"""Planner agent responsible for sequencing tasks and leveraging CBR."""
+"""Planner（规划）智能体：负责根据经验库生成执行计划。"""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from app.models.enums import ExperienceKind
 
 @dataclass
 class PlanStep:
-    """Structured representation of a single plan step."""
+    """单个计划步骤的结构表示。"""
 
     description: str
     agent: str
@@ -30,7 +30,7 @@ class PlanStep:
 
 
 class PlannerAgent(Agent):
-    """Generate a plan informed by past experiences."""
+    """综合历史案例与当前任务，输出可执行的步骤序列。"""
 
     def __init__(self, llm_proxy: LLMProxy, cbr_service: CBRService) -> None:
         super().__init__("Planner")
@@ -58,7 +58,7 @@ class PlannerAgent(Agent):
         self, goal: str, tasks: List[str], references: List[RetrievedCase]
     ) -> List[PlanStep]:
         if not tasks:
-            tasks = self._llm_breakdown(goal)
+            tasks = self._llm_breakdown(goal)  # 如果感知层没有提供任务则用 LLM 细化
         plan: List[PlanStep] = []
         seen_visual_cue = False
         for task in tasks:
@@ -77,7 +77,8 @@ class PlannerAgent(Agent):
 
         # Leverage references to append insights.
         for case in references:
-            if note := case.metadata.get("insight"):
+            note = (case.metadata or {}).get("insight")
+            if note:
                 plan.append(
                     PlanStep(description=f"Apply lesson: {note}", agent="Writer")
                 )

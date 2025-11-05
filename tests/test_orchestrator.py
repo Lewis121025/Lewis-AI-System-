@@ -1,3 +1,5 @@
+"""编排器集成测试：验证任务的全流程执行"""
+
 import os
 
 import pytest
@@ -17,6 +19,8 @@ from app.orchestrator.orchestrator import TaskOrchestrator
 
 
 class DummyStorage:
+    """避免真正访问对象存储的测试替身。"""
+
     def __init__(self):
         self.objects = {}
 

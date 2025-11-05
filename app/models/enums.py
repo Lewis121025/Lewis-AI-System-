@@ -1,4 +1,4 @@
-"""Enumerations used across persistence models."""
+"""枚举类型：统一表示任务状态、经验案例类型等。"""
 
 from enum import Enum
 

@@ -1,4 +1,4 @@
-"""Perceptor agent responsible for initial task derivation."""
+"""Perceptor（感知）智能体，用于将高层目标拆解为初始任务列表。"""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from app.agents.llm_proxy import LLMProxy, LLMRequest
 
 
 class PerceptorAgent(Agent):
-    """Derive actionable tasks from a high-level problem statement."""
+    """从用户输入或环境上下文中提取可执行任务。"""
 
     def __init__(self, llm_proxy: LLMProxy) -> None:
         super().__init__("Perceptor")
@@ -26,7 +26,7 @@ class PerceptorAgent(Agent):
 
     def _derive_tasks(self, goal: str) -> List[str]:
         if not goal:
-            return ["Clarify the user's goal."]
+            return ["Clarify the user's goal."]  # 没有有效输入时返回提示
 
         # Basic heuristic: split bullet points or sentences from input.
         tokens = [token.strip("-• ").strip() for token in goal.splitlines() if token.strip()]

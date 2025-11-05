@@ -1,4 +1,4 @@
-"""Factory helpers to assemble orchestrator dependencies."""
+"""编排器工厂方法：集中构建各智能体与依赖的实例。"""
 
 from functools import lru_cache
 
@@ -17,6 +17,7 @@ from app.orchestrator.orchestrator import TaskOrchestrator
 
 @lru_cache(maxsize=1)
 def build_orchestrator() -> TaskOrchestrator:
+    """创建单例编排器，避免重复初始化底层资源。"""
     llm_proxy = LLMProxy()
     sandbox = Sandbox()
     storage = ObjectStorageClient()

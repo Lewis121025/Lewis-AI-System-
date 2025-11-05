@@ -1,4 +1,4 @@
-"""Database entities representing system state and experiences."""
+"""数据库实体定义：保存任务状态、事件、经验与工件信息。"""
 
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ class VectorType(TypeDecorator):
     """
 
     cache_ok = True
+    impl = JSON
 
     def __init__(self, dimensions: int = 1536) -> None:
         super().__init__()
@@ -70,7 +71,9 @@ class TaskRecord(Base, TableNameMixin):
     status: Mapped[TaskStatus] = mapped_column(
         Enum(TaskStatus), default=TaskStatus.PENDING, nullable=False
     )
-    metadata: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    meta: Mapped[dict[str, Any]] = mapped_column(
+        "metadata", JSON, default=dict, nullable=False
+    )
     result_summary: Mapped[Optional[dict[str, Any]]] = mapped_column(
         JSON, nullable=True
     )
@@ -105,7 +108,9 @@ class ExperienceRecord(Base, TableNameMixin):
         Enum(ExperienceKind), default=ExperienceKind.PLAN, nullable=False
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    metadata: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+    meta: Mapped[dict[str, Any]] = mapped_column(
+        "metadata", JSON, default=dict, nullable=False
+    )
     embedding: Mapped[Optional[list[float]]] = mapped_column(
         VectorType(1536), nullable=True
     )

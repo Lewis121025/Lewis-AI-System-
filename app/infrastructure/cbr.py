@@ -1,4 +1,4 @@
-"""Case-Based Reasoning service."""
+"""CBR（案例推理）服务：负责存储与检索历史经验案例。"""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ class RetrievedCase:
 
 
 class CBRService:
-    """Case-Based Reasoning repository."""
+    """案例库管理器，为 Planner 等模块提供相似案例检索能力。"""
 
     def __init__(
         self,
@@ -62,7 +62,7 @@ class CBRService:
                 reference_id=reference_id,
                 kind=kind,
                 title=title,
-                metadata=payload,
+                meta=payload,
                 embedding=embedding,
             )
             session.add(record)
@@ -94,7 +94,7 @@ class CBRService:
                     reference_id=record.reference_id,
                     kind=record.kind,
                     title=record.title,
-                    metadata=record.metadata,
+                    metadata=record.meta,
                     score=score,
                 )
             )

@@ -2,12 +2,11 @@ fastapi
 uvicorn[standard]
 streamlit
 pydantic~=1.10
-pydantic-settings
 sqlalchemy>=2.0
 pgvector
 psycopg2-binary
 redis
-rq
+rq<2
 boto3
 opentelemetry-sdk
 opentelemetry-instrumentation-fastapi
@@ -23,3 +22,6 @@ tenacity
 pytest
 pytest-asyncio
 matplotlib
+click>=8
+h11
+pillow
