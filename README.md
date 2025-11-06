@@ -1,6 +1,6 @@
 ﻿# Lewis 的第一个项目——自治三层 AI 系统
 
-本仓库实现了“Lewis 的第一个项目”提出的三层智能系统：
+本仓库实现了三层智能系统：
 
 - **L1：Streamlit 指挥中心（ui/app.py）** – 负责收集用户目标、发起任务、轮询状态并展示事件日志。
 - **L2：FastAPI 网关（app/main.py 与 app/api）** – 暴露 REST/WebSocket 接口，处理鉴权，并与编排器交互。
