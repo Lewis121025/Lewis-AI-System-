@@ -1,4 +1,4 @@
-﻿# Lewis AI System - 三层自治智能系统
+﻿﻿# Lewis AI System - 三层自治智能系统
 
 <div align="center">
 
@@ -61,7 +61,7 @@ Lewis AI System 是一个**三层架构**的自治智能系统，通过多个专
 - **前端界面**: Streamlit (中文本地化)
 - **数据存储**: PostgreSQL + pgvector (向量检索)
 - **任务队列**: Redis + RQ
-- **LLM支持**: OpenAI / OpenRouter / Anthropic
+- **LLM支持**: OpenAI / gemini / Anthropic
 - **监控追踪**: OpenTelemetry
 
 ---
@@ -294,9 +294,6 @@ graph LR
 ### Q: 任务递归限制错误？
 **A**: 已将限制提升至100。如仍不够，修改 `langgraph_orchestrator.py` 中的 `recursion_limit` 参数。
 
-### Q: 中文编码错误？
-**A**: 已修复所有中文输出为英文，避免Windows GBK编码问题。
-
 ### Q: 端口8002被占用？
 **A**: 说明后端已在运行。检查：`netstat -ano | findstr :8002`
 
@@ -370,7 +367,7 @@ graph LR
 
 <div align="center">
 
-**⭐ 如果这个项目对你有帮助，请给一个 Star！**
+**⭐ Peace and Love！**
 
 Made with ❤️ by Lewis
 
