@@ -85,7 +85,7 @@ pip install -r requirements.txt
 
 1. **启动 FastAPI 后端**
    ```bash
-   uvicorn app.main:app --reload
+   uvicorn app.main:app --reload --host 127.0.0.1 --port 8002
    ```
 2. **启动 RQ worker**（新终端）
    ```bash

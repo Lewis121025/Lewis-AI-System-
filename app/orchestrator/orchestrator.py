@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import select
@@ -99,7 +99,7 @@ class TaskOrchestrator:
 
         goal = record.goal
         metadata = record.meta or {}
-        self._update_task_status(task_id, TaskStatus.RUNNING, started_at=datetime.utcnow())
+        self._update_task_status(task_id, TaskStatus.RUNNING, started_at=datetime.now(UTC))
 
         try:
             # L3 perception
@@ -212,7 +212,7 @@ class TaskOrchestrator:
                 task_id,
                 TaskStatus.COMPLETED,
                 result_summary=final_summary,
-                finished_at=datetime.utcnow(),
+                finished_at=datetime.now(UTC),
                 error_message=None,
             )
 
@@ -232,7 +232,7 @@ class TaskOrchestrator:
                 task_id,
                 TaskStatus.FAILED,
                 error_message=str(exc),
-                finished_at=datetime.utcnow(),
+                finished_at=datetime.now(UTC),
             )
             self._record_event(task_id, "task_failed", {"error": str(exc)})
             raise

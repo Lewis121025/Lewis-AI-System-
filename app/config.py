@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     """
 
     api_host: str = Field("127.0.0.1", description="FastAPI binding host")
-    api_port: int = Field(8001, description="FastAPI binding port")
+    api_port: int = Field(8002, description="FastAPI binding port")
     api_token: str = Field(
         "change-me",
         description=(
@@ -47,8 +47,8 @@ class Settings(BaseSettings):
         False, description="Toggle SQL echo for debugging SQLAlchemy sessions."
     )
 
-    redis_url: str = Field(
-        "redis://localhost:6379/0", description="Redis connection URI for queues."
+    redis_url: Optional[str] = Field(
+        None, description="Redis connection URI for queues. Set to None to disable Redis."
     )
     redis_dlq_url: Optional[str] = Field(
         None, description="Optional Redis URI for dead-letter queue separation."

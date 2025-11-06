@@ -7,12 +7,35 @@
 """
 
 import logging
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 from fastapi import FastAPI
 
 from app.api.routes import router as api_router
 from app.infrastructure.db import get_engine, init_db
 from app.infrastructure.telemetry import configure_logging, configure_tracing
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """应用生命周期管理：启动时初始化，关闭时清理资源。
+
+    使用 lifespan 替代已废弃的 on_event，提供更好的资源管理。
+    """
+    # 启动逻辑
+    engine = get_engine()
+    configure_tracing(app=app, engine=engine)
+    try:
+        init_db()
+        app.state.logger.info("Database initialized successfully")
+    except Exception as exc:  # pragma: no cover - startup failure
+        app.state.logger.exception("Database initialization failed: %s", exc)
+
+    yield
+
+    # 关闭逻辑（如需清理资源可在此添加）
+    app.state.logger.info("Application shutdown complete")
 
 
 def create_app() -> FastAPI:
@@ -22,23 +45,10 @@ def create_app() -> FastAPI:
         title="Lewis AI System",
         version="0.1.0",
         description="Three-layer autonomous AI system backend.",
+        lifespan=lifespan,
     )
     app.state.logger = logging.getLogger("uvicorn.error")
     app.include_router(api_router)
-
-    @app.on_event("startup")
-    async def _startup_event() -> None:
-        """启动事件：配置追踪并初始化数据库。
-
-        这里单独放在 startup 钩子中，可以避免在导入阶段执行
-        外部副作用，便于单元测试与脚本复用。
-        """
-        engine = get_engine()
-        configure_tracing(app=app, engine=engine)
-        try:
-            init_db()
-        except Exception as exc:  # pragma: no cover - startup failure
-            app.state.logger.exception("Database initialization failed: %s", exc)
 
     return app
 

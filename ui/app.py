@@ -59,7 +59,7 @@ def fetch_events(api_url: str, token: str, task_id: str) -> List[Dict[str, Any]]
 
 with st.sidebar:
     st.header("Backend Configuration")
-    api_base = st.text_input("FastAPI Base URL", value="http://localhost:8000")
+    api_base = st.text_input("FastAPI Base URL", value="http://localhost:8002")
     api_token = st.text_input("API Token", value="", type="password")
     sync_mode = st.checkbox("Synchronous execution", value=True)
     poll_interval = st.slider("Status refresh (seconds)", 1, 10, 2)
@@ -122,7 +122,7 @@ if active_task:
     if status_data and status_data["status"] not in {"completed", "failed", "cancelled"}:
         st.info("Task is still running. This page will refresh automatically.")
         time.sleep(poll_interval)
-        st.experimental_rerun()
+        st.rerun()
 
 if st.session_state.task_history:
     st.subheader("Previous Tasks")
@@ -131,5 +131,4 @@ if st.session_state.task_history:
         with cols[idx % len(cols)]:
             if st.button(task_id, key=f"history_{task_id}"):
                 st.session_state.active_task = task_id
-                st.experimental_rerun()
-
+                st.rerun()

@@ -102,6 +102,8 @@ class LLMProxy:
         headers = {
             "Authorization": f"Bearer {self.settings.openrouter_api_key}",
             "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost",
+            "X-Title": "Lewis AI Command Center",
         }
         payload = {
             "model": model,
@@ -137,13 +139,18 @@ class LLMProxy:
         )
 
     @staticmethod
-    def _offline_embedding(text: str) -> list[float]:
-        """Hash-based embedding to simulate vector output."""
-        digest = hashlib.sha256(text.encode("utf-8")).digest()
-        # produce deterministic vector of length 32
-        vector = [(byte / 255.0) for byte in digest[:32]]
-        # normalize to unit length
+    def _offline_embedding(text: str, dimensions: int = 1536) -> list[float]:
+        """Deterministic hash-based embedding matching production vector size."""
+        seed = text.encode("utf-8")
+        raw_values: list[float] = []
+        counter = 0
+        while len(raw_values) < dimensions:
+            counter_bytes = counter.to_bytes(4, "little", signed=False)
+            digest = hashlib.sha256(seed + counter_bytes).digest()
+            raw_values.extend(byte / 255.0 for byte in digest)
+            counter += 1
+        vector = raw_values[:dimensions]
         norm = math.sqrt(sum(val * val for val in vector))
         if norm == 0:
-            return [0.0 for _ in vector]
+            return [0.0 for _ in range(dimensions)]
         return [val / norm for val in vector]

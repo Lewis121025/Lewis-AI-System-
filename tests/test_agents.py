@@ -36,6 +36,7 @@ def configure_sqlite(tmp_path_factory):
     db_dir = tmp_path_factory.mktemp("db")
     db_path = db_dir / "lewis_test.db"
     os.environ["DATABASE_URL"] = f"sqlite:///{db_path.as_posix()}"
+    os.environ["OPENROUTER_API_KEY"] = ""
     reset_settings_cache()
     init_db(create_extensions=False)
     yield

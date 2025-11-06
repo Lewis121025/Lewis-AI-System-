@@ -49,8 +49,8 @@ class Sandbox:
                 stdout_bytes, stderr_bytes = await asyncio.wait_for(
                     process.communicate(), timeout=self.timeout
                 )
-                stdout = stdout_bytes.decode("utf-8")
-                stderr = stderr_bytes.decode("utf-8")
+                stdout = stdout_bytes.decode("utf-8", errors="replace")
+                stderr = stderr_bytes.decode("utf-8", errors="replace")
                 success = process.returncode == 0
                 return SandboxResult(
                     success=success,

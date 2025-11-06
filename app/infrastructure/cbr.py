@@ -86,9 +86,16 @@ class CBRService:
 
         scored: list[RetrievedCase] = []
         for record in records:
-            if not record.embedding:
+            stored_embedding = record.embedding
+            if stored_embedding is None:
                 continue
-            score = _cosine_similarity(query_embedding, record.embedding)
+            if hasattr(stored_embedding, "tolist"):
+                embedding_vector = stored_embedding.tolist()
+            else:
+                embedding_vector = stored_embedding
+            if not embedding_vector:
+                continue
+            score = _cosine_similarity(query_embedding, embedding_vector)
             scored.append(
                 RetrievedCase(
                     reference_id=record.reference_id,
