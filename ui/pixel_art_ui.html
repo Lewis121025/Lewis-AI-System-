@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lewis AI System - Pixel Art UI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           CSS VARIABLES - PASTEL COLOR PALETTE
+           ============================================ */
+        :root {
+            /* Base colors - HSL with 60-80% lightness, 20-40% saturation */
+            --color-bg-primary: hsl(240, 25%, 70%);
+            --color-bg-secondary: hsl(260, 30%, 75%);
+            --color-bg-tertiary: hsl(280, 20%, 80%);
+            
+            --color-accent-1: hsl(200, 35%, 65%);
+            --color-accent-2: hsl(320, 30%, 70%);
+            --color-accent-3: hsl(140, 25%, 65%);
+            
+            --color-text-primary: hsl(240, 15%, 25%);
+            --color-text-secondary: hsl(240, 10%, 40%);
+            --color-text-inverse: hsl(240, 20%, 85%);
+            
+            /* Shadows - 0-2px blur, 10-20% opacity */
+            --shadow-soft: 0 2px 4px hsla(240, 30%, 20%, 0.15);
+            --shadow-medium: 0 4px 8px hsla(240, 30%, 20%, 0.18);
+            --shadow-strong: 0 8px 16px hsla(240, 30%, 20%, 0.2);
+            
+            /* Border radius */
+            --radius-small: 4px;
+            --radius-medium: 8px;
+            
+            /* Spacing - 8px grid system */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-xxl: 48px;
+            
+            /* Typography */
+            --font-primary: 'Inter', 'DM Sans', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-size-xs: 12px;
+            --font-size-sm: 14px;
+            --font-size-md: 16px;
+            --font-size-lg: 20px;
+            --font-size-xl: 24px;
+            --font-size-xxl: 32px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-medium: 250ms ease;
+            --transition-slow: 350ms ease;
+        }
+        
+        /* ============================================
+           RESET & BASE STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        body {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            line-height: 1.6;
+            color: var(--color-text-primary);
+            background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 50%, var(--color-bg-tertiary) 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+        
+        /* ============================================
+           8PX GRID SYSTEM
+           ============================================ */
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+        
+        .grid {
+            display: grid;
+            gap: var(--spacing-md);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        
+        @media (min-width: 320px) {
+            .container { padding: 0 var(--spacing-sm); }
+        }
+        
+        @media (min-width: 768px) {
+            .container { padding: 0 var(--spacing-md); }
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (min-width: 1024px) {
+            .container { padding: 0 var(--spacing-lg); }
+            .grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        
+        @media (min-width: 1440px) {
+            .container { padding: 0 var(--spacing-xl); }
+            .grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        
+        /* ============================================
+           GLASSMORPHISM CARDS
+           ============================================ */
+        .card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius-medium);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-soft);
+            transition: all var(--transition-medium);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                var(--color-accent-1) 0%, 
+                var(--color-accent-2) 50%, 
+                var(--color-accent-3) 100%);
+            opacity: 0.6;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            border-color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .card:focus-within {
+            outline: 2px solid var(--color-accent-1);
+            outline-offset: 2px;
+        }
+        
+        /* ============================================
+           NEUMORPHIC BUTTONS (Pixel Art Adapted)
+           ============================================ */
+        .btn {
+            display: inline-block;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            font-weight: 500;
+            color: var(--color-text-primary);
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-medium);
+            box-shadow: 
+                inset 0 1px 2px rgba(255, 255, 255, 0.8),
+                0 2px 4px rgba(0, 0, 0, 0.1),
+                0 4px 8px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left var(--transition-medium);
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 
+                inset 0 1px 2px rgba(255, 255, 255, 0.9),
+                0 3px 6px rgba(0, 0, 0, 0.12),
+                0 6px 12px rgba(0, 0, 0, 0.08);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:focus-visible {
+            outline: 2px solid var(--color-accent-1);
+            outline-offset: 2px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2));
+            color: var(--color-text-inverse);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* ============================================
+           PIXEL ART ICONS & SPRITES
+           ============================================ */
+        .pixel-icon {
+            width: 24px;
+            height: 24px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        .pixel-icon-large {
+            width: 32px;
+            height: 32px;
+        }
+        
+        /* Animated pixel sprite loader */
+        .pixel-loader {
+            width: 32px;
+            height: 32px;
+            position: relative;
+            margin: var(--spacing-md) auto;
+        }
+        
+        .pixel-loader::before,
+        .pixel-loader::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--color-accent-1);
+            border-radius: var(--radius-small);
+            animation: pixel-bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .pixel-loader::before {
+            left: 0;
+            animation-delay: -0.32s;
+        }
+        
+        .pixel-loader::after {
+            right: 0;
+            animation-delay: 0.32s;
+        }
+        
+        @keyframes pixel-bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            .pixel-loader::before,
+            .pixel-loader::after {
+                animation: none;
+            }
+        }
+        
+        /* ============================================
+           FORM ELEMENTS
+           ============================================ */
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 500;
+            color: var(--color-text-primary);
+        }
+        
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-family: var(--font-primary);
+            font-size: var(--font-size-md);
+            color: var(--color-text-primary);
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-medium);
+            box-shadow: var(--shadow-soft);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--color-accent-1);
+            box-shadow: 
+                var(--shadow-soft),
+                0 0 0 2px rgba(200, 220, 255, 0.3);
+            background: rgba(255, 255, 255, 0.6);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        /* ============================================
+           HEADER & NAVIGATION
+           ============================================ */
+        .header {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+            padding: var(--spacing-md) 0;
+            margin-bottom: var(--spacing-xl);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+        
+        .logo {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+        
+        .nav {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+        
+        /* ============================================
+           STATUS INDICATORS
+           ============================================ */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs) var(--spacing-md);
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius-medium);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+        }
+        
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-accent-3);
+            box-shadow: 0 0 4px var(--color-accent-3);
+        }
+        
+        .status-badge.online::before {
+            background: var(--color-accent-3);
+        }
+        
+        .status-badge.offline::before {
+            background: hsl(0, 50%, 60%);
+        }
+        
+        /* ============================================
+           UTILITY CLASSES
+           ============================================ */
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        
+        .mb-sm { margin-bottom: var(--spacing-sm); }
+        .mb-md { margin-bottom: var(--spacing-md); }
+        .mb-lg { margin-bottom: var(--spacing-lg); }
+        .mb-xl { margin-bottom: var(--spacing-xl); }
+        
+        .mt-sm { margin-top: var(--spacing-sm); }
+        .mt-md { margin-top: var(--spacing-md); }
+        .mt-lg { margin-top: var(--spacing-lg); }
+        .mt-xl { margin-top: var(--spacing-xl); }
+        
+        .gradient-overlay {
+            position: relative;
+        }
+        
+        .gradient-overlay::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(5deg, 
+                rgba(200, 220, 255, 0.1) 0%, 
+                rgba(220, 200, 255, 0.1) 100%);
+            pointer-events: none;
+            border-radius: var(--radius-medium);
+        }
+        
+        /* ============================================
+           RESPONSIVE TYPOGRAPHY
+           ============================================ */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text-primary);
+        }
+        
+        h1 { font-size: var(--font-size-xxl); }
+        h2 { font-size: var(--font-size-xl); }
+        h3 { font-size: var(--font-size-lg); }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: var(--font-size-xl); }
+            h2 { font-size: var(--font-size-lg); }
+            h3 { font-size: var(--font-size-md); }
+        }
+        
+        /* ============================================
+           ACCESSIBILITY ENHANCEMENTS
+           ============================================ */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        
+        /* Skip link for keyboard navigation */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--color-accent-1);
+            color: var(--color-text-inverse);
+            padding: var(--spacing-sm) var(--spacing-md);
+            text-decoration: none;
+            border-radius: var(--radius-small);
+            z-index: 1000;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+        
+        /* Focus visible for all interactive elements */
+        *:focus-visible {
+            outline: 2px solid var(--color-accent-1);
+            outline-offset: 2px;
+        }
+        
+        /* ============================================
+           ANIMATIONS (Respects reduced motion)
+           ============================================ */
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fade-in var(--transition-medium) ease-out;
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">LEWIS AI SYSTEM</div>
+                <nav class="nav" role="navigation" aria-label="Main navigation">
+                    <a href="#dashboard" class="btn btn-secondary">Dashboard</a>
+                    <a href="#tasks" class="btn btn-secondary">Tasks</a>
+                    <a href="#agents" class="btn btn-secondary">Agents</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+    
+    <main id="main-content" class="container">
+        <!-- Hero Section -->
+        <section class="card gradient-overlay mb-xl fade-in" style="text-align: center; padding: var(--spacing-xxl);">
+            <h1>Lewis AI System</h1>
+            <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); margin-bottom: var(--spacing-lg);">
+                Three-Layer Autonomous AI System
+            </p>
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                <span class="status-badge online">Perceptor Online</span>
+                <span class="status-badge online">Planner Online</span>
+                <span class="status-badge online">Executor Online</span>
+                <span class="status-badge online">Critic Online</span>
+            </div>
+        </section>
+        
+        <!-- Task Creation Form -->
+        <section class="card mb-xl fade-in">
+            <h2>Launch New Task</h2>
+            <form id="task-form" onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <label for="task-goal" class="form-label">Task Description</label>
+                    <textarea 
+                        id="task-goal" 
+                        class="form-textarea" 
+                        placeholder="Enter your task goal here..."
+                        required
+                        aria-required="true"
+                    ></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="task-name" class="form-label">Task Name (Optional)</label>
+                    <input 
+                        type="text" 
+                        id="task-name" 
+                        class="form-input" 
+                        placeholder="Give your task a name"
+                    >
+                </div>
+                <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary">Start Task</button>
+                    <button type="reset" class="btn btn-secondary">Clear</button>
+                </div>
+            </form>
+        </section>
+        
+        <!-- Quick Tasks -->
+        <section class="card mb-xl fade-in">
+            <h2>Quick Tasks</h2>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <button class="btn btn-secondary" onclick="setQuickTask('Hello World')">
+                    👋 Hello World
+                </button>
+                <button class="btn btn-secondary" onclick="setQuickTask('Weather Query')">
+                    🌤️ Weather
+                </button>
+                <button class="btn btn-secondary" onclick="setQuickTask('Web Search')">
+                    🔍 Search
+                </button>
+                <button class="btn btn-secondary" onclick="setQuickTask('Python Tutorial')">
+                    🐍 Python
+                </button>
+            </div>
+        </section>
+        
+        <!-- Agent Status Cards -->
+        <section class="mb-xl">
+            <h2 class="mb-lg">System Status</h2>
+            <div class="grid">
+                <div class="card fade-in">
+                    <h3>🧠 Perceptor</h3>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                        Perception and understanding layer
+                    </p>
+                    <div class="pixel-loader" style="margin: var(--spacing-md) 0;"></div>
+                    <span class="status-badge online">Online</span>
+                </div>
+                <div class="card fade-in">
+                    <h3>📋 Planner</h3>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                        Task planning and orchestration
+                    </p>
+                    <div class="pixel-loader" style="margin: var(--spacing-md) 0;"></div>
+                    <span class="status-badge online">Online</span>
+                </div>
+                <div class="card fade-in">
+                    <h3>⚡ Executor</h3>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                        Code generation and execution
+                    </p>
+                    <div class="pixel-loader" style="margin: var(--spacing-md) 0;"></div>
+                    <span class="status-badge online">Online</span>
+                </div>
+                <div class="card fade-in">
+                    <h3>🎯 Critic</h3>
+                    <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+                        Quality review and feedback
+                    </p>
+                    <div class="pixel-loader" style="margin: var(--spacing-md) 0;"></div>
+                    <span class="status-badge online">Online</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Task History -->
+        <section class="card fade-in">
+            <h2>Recent Tasks</h2>
+            <div id="task-list" style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                <p style="color: var(--color-text-secondary); text-align: center; padding: var(--spacing-xl);">
+                    No tasks yet. Create your first task above!
+                </p>
+            </div>
+        </section>
+    </main>
+    
+    <footer style="text-align: center; padding: var(--spacing-xl); color: var(--color-text-secondary); margin-top: var(--spacing-xxl);">
+        <p>🤖 Lewis AI System v2.0 | Three-Layer Autonomous AI System</p>
+        <p style="font-size: var(--font-size-sm); margin-top: var(--spacing-sm);">
+            Powered by FastAPI + Streamlit | Supports intelligent search, code generation, quality review
+        </p>
+    </footer>
+    
+    <script>
+        // Quick task handler
+        function setQuickTask(taskName) {
+            const textarea = document.getElementById('task-goal');
+            const examples = {
+                'Hello World': 'Write a "Hello World" Program',
+                'Weather Query': '查询杭州天气',
+                'Web Search': '搜索人工智能最新进展',
+                'Python Tutorial': 'Search for Python best practices 2024'
+            };
+            textarea.value = examples[taskName] || taskName;
+            textarea.focus();
+        }
+        
+        // Form submission handler
+        function handleSubmit(event) {
+            event.preventDefault();
+            const goal = document.getElementById('task-goal').value;
+            const name = document.getElementById('task-name').value;
+            
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+            
+            // Simulate API call (replace with actual API integration)
+            setTimeout(() => {
+                alert(`Task "${name || 'Unnamed'}" created!\nGoal: ${goal}`);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                event.target.reset();
+            }, 1500);
+        }
+        
+        // Keyboard navigation enhancement
+        document.addEventListener('keydown', (e) => {
+            // Alt + N: Focus on new task form
+            if (e.altKey && e.key === 'n') {
+                e.preventDefault();
+                document.getElementById('task-goal').focus();
+            }
+        });
+        
+        // Add fade-in animation on scroll (with reduced motion support)
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all cards for scroll animations
+        document.querySelectorAll('.card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

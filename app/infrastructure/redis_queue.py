@@ -22,10 +22,18 @@ def get_redis_connection(url: Optional[str] = None) -> redis.Redis:
     """Return a cached Redis connection."""
     settings = get_settings()
     redis_url = url or settings.redis_url
+    if not redis_url:
+        raise ValueError("Redis URL is not configured. Set REDIS_URL environment variable or configure in settings.")
     if redis_url not in _REDIS_CONN:
-        _REDIS_CONN[redis_url] = redis.Redis.from_url(
-            redis_url, decode_responses=True
-        )
+        try:
+            _REDIS_CONN[redis_url] = redis.Redis.from_url(
+                redis_url, decode_responses=True
+            )
+            # 测试连接
+            _REDIS_CONN[redis_url].ping()
+        except (redis.ConnectionError, redis.TimeoutError) as exc:
+            LOGGER.error("Failed to connect to Redis at %s: %s", redis_url, exc)
+            raise
     return _REDIS_CONN[redis_url]
 
 
@@ -33,7 +41,11 @@ def get_queue(name: str = "orchestrator") -> Queue:
     """Return the primary RQ queue used by agents."""
     global _QUEUE
     if _QUEUE is None:
-        _QUEUE = Queue(name, connection=get_redis_connection())
+        try:
+            _QUEUE = Queue(name, connection=get_redis_connection())
+        except Exception as exc:
+            LOGGER.warning("Failed to initialize Redis queue: %s. Queue operations will fail.", exc)
+            raise
     return _QUEUE
 
 

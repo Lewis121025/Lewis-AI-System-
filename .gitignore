@@ -1,18 +1,37 @@
-.env
+# Python
 __pycache__/
-*.pyc
-.pytest_cache/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Database
 *.db
-*.sqlite
 *.sqlite3
+
+# Logs
 *.log
-*.csv
-*.zip
-*.msi
-*.exe
-.DS_Store
+logs/
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.bak
+save_screenshots_guide.md

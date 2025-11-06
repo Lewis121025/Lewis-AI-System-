@@ -4,7 +4,7 @@ from rq import Queue, Worker
 from rq.connections import Connection
 
 from app.infrastructure.redis_queue import get_queue, get_redis_connection
-from app.orchestrator.orchestrator import process_task_job
+from app.orchestrator.langgraph_orchestrator import process_task_job
 
 
 def run_worker(queue_name: str = "orchestrator") -> None:

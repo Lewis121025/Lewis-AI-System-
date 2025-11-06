@@ -36,6 +36,8 @@ def main():
         port=8002,
         reload=True,
         log_level="info",
+        timeout_keep_alive=75,  # 保持连接超时（秒）
+        timeout_graceful_shutdown=30,  # 优雅关闭超时（秒）
     )
 
 

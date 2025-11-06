@@ -52,11 +52,13 @@ class LLMProxy:
         """根据配置路由补全请求，优先使用高可用的提供商。"""
         provider = (request.provider or self.settings.default_llm_provider).lower()
         if provider == "openai" and self.settings.openai_api_key:
+            LOGGER.debug("Using OpenAI API for completion")
             return self._complete_openai(request)
         if provider == "openrouter" and self.settings.openrouter_api_key:
+            LOGGER.debug("Using OpenRouter API for completion")
             return self._complete_openrouter(request)
-        LOGGER.debug(
-            "Falling back to offline completion for provider %s", provider
+        LOGGER.warning(
+            "Falling back to offline completion for provider %s (no API key configured)", provider
         )
         return self._offline_completion(request.prompt)
 
@@ -65,6 +67,12 @@ class LLMProxy:
         provider = self.settings.default_llm_provider.lower()
         if provider == "openai" and self.settings.openai_api_key:
             return self._embed_openai(text, model)
+        # OpenRouter等平台通常不提供embedding API，使用离线模式是正常的
+        # 但可以通过OpenAI的embedding API（如果配置了OpenAI key）或使用离线embedding
+        if self.settings.openai_api_key:
+            # 如果OpenRouter是默认provider但配置了OpenAI key，使用OpenAI embedding
+            return self._embed_openai(text, model)
+        LOGGER.debug("Using offline embedding (no embedding API available)")
         return self._offline_embedding(text)
 
     # --- Provider implementations -------------------------------------------------

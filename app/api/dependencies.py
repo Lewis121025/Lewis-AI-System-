@@ -5,7 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import get_settings
 from app.orchestrator.factory import build_orchestrator
-from app.orchestrator.orchestrator import TaskOrchestrator
+from app.orchestrator.langgraph_orchestrator import LangGraphOrchestrator
 
 _security = HTTPBearer()
 
@@ -18,7 +18,7 @@ def require_token(credentials: HTTPAuthorizationCredentials = Depends(_security)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
 
-def get_orchestrator() -> TaskOrchestrator:
+def get_orchestrator() -> LangGraphOrchestrator:
     """返回单例编排器，供路由层注入使用。"""
     return build_orchestrator()
 

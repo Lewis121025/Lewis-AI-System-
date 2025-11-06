@@ -102,6 +102,22 @@ class Settings(BaseSettings):
         description="Default OpenRouter model identifier.",
     )
 
+    # Google Custom Search API configuration
+    google_search_api_key: Optional[str] = Field(
+        None, description="Google Custom Search API key for web search capabilities."
+    )
+    google_search_engine_id: Optional[str] = Field(
+        None, description="Google Custom Search Engine ID (cx parameter)."
+    )
+    google_search_max_results: int = Field(
+        5, description="Maximum number of search results to return."
+    )
+    
+    # Weather API configuration
+    weather_api_key: Optional[str] = Field(
+        None, description="WeatherAPI.com API key for real-time weather data."
+    )
+
     sandbox_timeout_seconds: int = Field(
         30, description="Execution timeout for sandboxed code invocation. 沙箱执行超时时间（秒）。"
     )
