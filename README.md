@@ -1,8 +1,10 @@
-﻿﻿# Lewis AI System - 三层自治智能系统
+﻿# Lewis Trinity AI Platform
 
 <div align="center">
 
-**🤖 基于 LangGraph 的多智能体协作系统**
+**🤖 A Three-Layer Autonomous Multi-Agent System Based on LangGraph**
+
+*Intelligent agents working together to solve complex tasks*
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
@@ -15,7 +17,14 @@
 
 ## 📖 项目简介
 
-Lewis AI System 是一个**三层架构**的自治智能系统，通过多个专业智能体（Agents）协作完成复杂任务。系统支持智能搜索、天气查询、代码生成、报告撰写等多种任务类型。
+**Lewis Trinity AI Platform** 是一个基于 LangGraph 的三层自治智能系统，通过多个专业智能体（Agents）协作完成复杂任务。系统采用"感知-规划-执行-评审"的完整闭环流程，支持智能搜索、天气查询、代码生成、报告撰写等多种任务类型。
+
+### 💡 核心理念
+
+- **三层架构分离**: UI层、API层、Agent层职责清晰，易于维护和扩展
+- **智能体协作**: 多个专业Agent通过LangGraph状态机协同工作
+- **闭环反馈**: 每个任务都经过感知→规划→执行→评审的完整流程
+- **灵活扩展**: 可轻松添加新的Agent和功能模块
 
 ### 🏗️ 三层架构
 
@@ -86,6 +95,218 @@ Lewis AI System 是一个**三层架构**的自治智能系统，通过多个专
 
 ---
 
+## 🔄 系统运行逻辑
+
+### 完整任务执行流程
+
+```
+用户提交任务
+    ↓
+1. Perceptor（感知层）
+   - 理解用户意图
+   - 提取任务关键信息
+   - 判断任务复杂度
+    ↓
+2. Planner（规划层）
+   - 任务智能分解
+   - 生成执行步骤
+   - 分配对应Agent
+    ↓
+3. Executor（执行层）
+   ├─→ Researcher：网络搜索
+   ├─→ Weather：天气查询
+   ├─→ Writer：代码生成
+   └─→ Sandbox：安全执行
+    ↓
+4. Critic（评审层）
+   - 质量评估（0-1评分）
+   - 结果验证
+   - 反馈建议
+    ↓
+返回最终结果
+```
+
+### LangGraph 状态图
+
+系统使用 LangGraph 管理复杂的 Agent 工作流：
+
+```python
+# 状态图节点
+perceptor → planner → execute_plan → critic → finalize
+
+# 执行节点可以循环，直到所有步骤完成
+execute_plan ─┐
+      ↑      │
+      └──────┘ (继续下一步骤)
+```
+
+**关键设计点**：
+- 🔁 **动态循环**: `execute_plan` 节点根据计划步骤数自动循环
+- 🎯 **条件跳转**: 通过 `_should_continue_execution` 判断是否继续
+- 📊 **状态累积**: 使用 `Annotated[List, operator.add]` 累积执行日志
+- 🛡️ **错误处理**: 每个节点都有异常捕获和状态更新
+
+### Agent 协作机制
+
+```python
+# 1. 数据流转
+Researcher.search() 
+    → 结果存入 prior_outputs["researcher"]
+    → Writer.generate_code(research_data)
+
+# 2. 上下文共享
+class AgentContext:
+    task_id: str          # 任务ID
+    goal: str             # 任务目标
+    payload: dict         # 步骤参数
+    prior_outputs: dict   # 前序Agent输出
+
+# 3. 智能路由
+if "搜索" in goal:
+    planner → Researcher → Writer
+elif "天气" in goal:
+    planner → Weather → Writer
+else:
+    planner → Writer
+```
+
+---
+
+## 🏗️ 系统搭建逻辑
+
+### 架构设计原则
+
+#### 1. 分层解耦
+```
+L1 (UI Layer)
+└─ Streamlit界面，只负责展示和用户交互
+
+L2 (API Layer)  
+└─ FastAPI网关，处理请求路由和任务调度
+
+L3 (Agent Layer)
+└─ 智能体执行，各Agent独立且可组合
+```
+
+#### 2. 依赖注入
+```python
+# app/orchestrator/factory.py
+def build_orchestrator():
+    # 统一创建所有依赖
+    llm_proxy = LLMProxy()
+    sandbox = Sandbox()
+    storage = ObjectStorageClient()
+    
+    # 注入到各Agent
+    writer = WriterAgent(llm_proxy, sandbox, storage)
+    researcher = ResearcherAgent(search_tool, llm_proxy)
+    
+    # 构建编排器
+    return LangGraphOrchestrator(
+        writer=writer,
+        researcher=researcher,
+        ...
+    )
+```
+
+#### 3. 状态持久化
+```
+Task Creation
+    ↓
+Database Record (PostgreSQL)
+    ├─ task_id: 任务唯一标识
+    ├─ status: pending/running/completed/failed
+    ├─ result_summary: 执行结果
+    └─ events[]: 事件日志
+```
+
+#### 4. 任务队列模式
+
+**同步模式** (无Worker):
+```
+HTTP Request → 直接执行 → 返回结果
+优点: 简单可靠
+缺点: 请求会等待任务完成
+```
+
+**异步模式** (有Worker):
+```
+HTTP Request → 入队列 → 立即返回Task ID
+           ↓
+        Worker拉取 → 执行 → 更新状态
+优点: 快速响应，可并发
+缺点: 需要额外的Redis和Worker进程
+```
+
+### 核心模块构建
+
+#### 1. LLM Proxy（统一LLM接口）
+```python
+class LLMProxy:
+    def complete(self, request: LLMRequest) -> str:
+        # 支持多个LLM提供商
+        if provider == "openai": ...
+        elif provider == "openrouter": ...
+        else: return offline_fallback()
+```
+
+#### 2. Sandbox（安全代码执行）
+```python
+class Sandbox:
+    def run_sync(self, code: str) -> SandboxResult:
+        # 隔离子进程执行
+        # 超时控制
+        # 输出捕获
+```
+
+#### 3. Agent Base（智能体基类）
+```python
+class Agent:
+    def execute(self, context: AgentContext) -> AgentResponse:
+        # 统一的执行接口
+        # 返回标准化响应
+```
+
+#### 4. Orchestrator（任务编排器）
+```python
+class LangGraphOrchestrator:
+    def __init__(self, agents...):
+        self.graph = self._build_graph()  # 构建状态图
+        self.app = self.graph.compile()   # 编译为可执行应用
+    
+    def start_task(self, goal: str, sync: bool):
+        # 创建初始状态
+        # 调用 self.app.invoke()
+        # 更新数据库
+```
+
+### 扩展新Agent的步骤
+
+1. **创建Agent类**
+```python
+# app/agents/my_agent.py
+class MyAgent(Agent):
+    def execute(self, context: AgentContext) -> AgentResponse:
+        # 实现你的逻辑
+        return AgentResponse(success=True, output={...})
+```
+
+2. **注册到Factory**
+```python
+# app/orchestrator/factory.py
+my_agent = MyAgent(llm_proxy)
+orchestrator = LangGraphOrchestrator(..., my_agent=my_agent)
+```
+
+3. **添加到Planner识别**
+```python
+# app/agents/planner.py
+if "my_keyword" in goal:
+    steps.append({"agent": "MyAgent", ...})
+```
+
+---
+
 ## 🚀 快速开始
 
 ### 前置要求
@@ -98,8 +319,8 @@ Lewis AI System 是一个**三层架构**的自治智能系统，通过多个专
 
 1. **克隆仓库**
 ```bash
-git clone https://github.com/Lewis121025/Lewis-first-project.git
-cd Lewis-first-project
+git clone https://github.com/Lewis121025/Lewis-AI-System-.git
+cd Lewis-AI-System-
 ```
 
 2. **创建虚拟环境**
@@ -173,7 +394,7 @@ python start_worker.py
 ## 📁 项目结构
 
 ```
-Lewis-first-project/
+Lewis-AI-System-/
 ├── app/
 │   ├── agents/              # 智能体实现
 │   │   ├── base.py         # Agent基类
@@ -361,7 +582,7 @@ graph LR
 ## 📧 联系方式
 
 - GitHub: [@Lewis121025](https://github.com/Lewis121025)
-- 项目地址: [Lewis-first-project](https://github.com/Lewis121025/Lewis-first-project)
+- 项目地址: [Lewis Trinity AI Platform](https://github.com/Lewis121025/Lewis-AI-System-)
 
 ---
 
