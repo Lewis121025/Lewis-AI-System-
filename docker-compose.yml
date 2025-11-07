@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: lewis-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lewis
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lewis-network
+
+  # Redis队列
+  redis:
+    image: redis:7-alpine
+    container_name: lewis-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lewis-network
+
+  # FastAPI后端
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lewis-backend
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@postgres:5432/lewis
+      - REDIS_URL=redis://redis:6379/0
+      - API_TOKEN=${API_TOKEN:-change-me}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY:-}
+      - GOOGLE_SEARCH_ENGINE_ID=${GOOGLE_SEARCH_ENGINE_ID:-}
+      - WEATHER_API_KEY=${WEATHER_API_KEY:-}
+    ports:
+      - "8002:8002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - lewis-network
+    restart: unless-stopped
+
+  # RQ Worker (可选)
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lewis-worker
+    command: python -c "from app.tasks.worker import run_worker; run_worker()"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@postgres:5432/lewis
+      - REDIS_URL=redis://redis:6379/0
+      - API_TOKEN=${API_TOKEN:-change-me}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY:-}
+      - GOOGLE_SEARCH_ENGINE_ID=${GOOGLE_SEARCH_ENGINE_ID:-}
+      - WEATHER_API_KEY=${WEATHER_API_KEY:-}
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - lewis-network
+    restart: unless-stopped
+
+  # Streamlit前端
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: lewis-frontend
+    environment:
+      - BACKEND_URL=http://backend:8002
+      - API_TOKEN=${API_TOKEN:-change-me}
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend
+    networks:
+      - lewis-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  lewis-network:
+    driver: bridge
+

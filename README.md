@@ -311,6 +311,11 @@ if "my_keyword" in goal:
 
 ### 前置要求
 
+**Docker方式（推荐）：**
+- Docker 20.10+
+- Docker Compose 2.0+
+
+**本地方式：**
 - Python 3.10+
 - PostgreSQL 14+ (可选，已启用 pgvector)
 - Redis 6+ (可选，用于异步任务)
@@ -359,7 +364,42 @@ WEATHER_API_KEY=your_key_here
 
 ### 启动服务
 
-**Windows 用户（推荐）:**
+#### 方式1: Docker Compose（推荐）🐳
+
+**一键启动所有服务：**
+```bash
+# 创建 .env 文件（可选，使用环境变量）
+cat > .env << EOF
+API_TOKEN=your-secure-token
+OPENROUTER_API_KEY=your-key
+GOOGLE_SEARCH_API_KEY=your-key
+GOOGLE_SEARCH_ENGINE_ID=your-id
+WEATHER_API_KEY=your-key
+EOF
+
+# 启动所有服务（PostgreSQL + Redis + Backend + Frontend + Worker）
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+```
+
+**服务地址：**
+- 前端界面: http://localhost:8501
+- API文档: http://localhost:8002/docs
+- 健康检查: http://localhost:8002/health
+
+**开发模式（热重载）：**
+```bash
+docker-compose -f docker-compose.dev.yml up
+```
+
+#### 方式2: 本地启动
+
+**Windows 用户:**
 ```bash
 # 1. 启动后端
 start_backend.bat
@@ -391,6 +431,77 @@ python start_worker.py
 
 ---
 
+## 🐳 Docker 部署
+
+### 快速开始
+
+```bash
+# 克隆仓库
+git clone https://github.com/Lewis121025/Lewis-AI-System-.git
+cd Lewis-AI-System-
+
+# 使用Docker Compose一键启动
+docker-compose up -d
+```
+
+### Docker Compose 服务
+
+- **postgres**: PostgreSQL + pgvector 数据库
+- **redis**: Redis 任务队列
+- **backend**: FastAPI 后端服务
+- **worker**: RQ Worker 异步任务处理
+- **frontend**: Streamlit 前端界面
+
+### 环境变量配置
+
+创建 `.env` 文件或设置环境变量：
+
+```bash
+API_TOKEN=your-secure-token
+OPENROUTER_API_KEY=your-openrouter-key
+GOOGLE_SEARCH_API_KEY=your-google-search-key
+GOOGLE_SEARCH_ENGINE_ID=your-engine-id
+WEATHER_API_KEY=your-weather-api-key
+```
+
+### 常用命令
+
+```bash
+# 启动所有服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# 重启服务
+docker-compose restart backend
+
+# 停止所有服务
+docker-compose down
+
+# 停止并删除数据卷
+docker-compose down -v
+
+# 重新构建镜像
+docker-compose build --no-cache
+```
+
+### 单独构建镜像
+
+```bash
+# 构建后端镜像
+docker build -t lewis-backend:latest .
+
+# 构建前端镜像
+docker build -f Dockerfile.frontend -t lewis-frontend:latest .
+
+# 运行容器
+docker run -d -p 8002:8002 --env-file .env lewis-backend:latest
+```
+
+---
+
 ## 📁 项目结构
 
 ```
@@ -417,6 +528,11 @@ Lewis-AI-System-/
 │   └── app.py              # Streamlit前端
 ├── tests/                   # 测试用例
 ├── screenshots/             # 界面截图
+├── Dockerfile               # 后端Docker镜像
+├── Dockerfile.frontend      # 前端Docker镜像
+├── docker-compose.yml      # Docker Compose配置
+├── docker-compose.dev.yml  # 开发环境配置
+├── .dockerignore           # Docker忽略文件
 ├── start_backend.bat       # Windows启动脚本
 ├── start_ui.bat
 ├── start_worker.bat
