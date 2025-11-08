@@ -47,9 +47,12 @@ services:
       - DATABASE_URL=postgresql+psycopg2://postgres:postgres@postgres:5432/lewis
       - REDIS_URL=redis://redis:6379/0
       - API_TOKEN=${API_TOKEN:-change-me}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-openai}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENROUTER_DEFAULT_MODEL=${OPENROUTER_DEFAULT_MODEL:-meta-llama/llama-4-maverick:free}
       - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY:-}
       - GOOGLE_SEARCH_ENGINE_ID=${GOOGLE_SEARCH_ENGINE_ID:-}
+      - GOOGLE_SEARCH_MAX_RESULTS=${GOOGLE_SEARCH_MAX_RESULTS:-5}
       - WEATHER_API_KEY=${WEATHER_API_KEY:-}
     ports:
       - "8002:8002"
@@ -75,9 +78,12 @@ services:
       - DATABASE_URL=postgresql+psycopg2://postgres:postgres@postgres:5432/lewis
       - REDIS_URL=redis://redis:6379/0
       - API_TOKEN=${API_TOKEN:-change-me}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-openai}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENROUTER_DEFAULT_MODEL=${OPENROUTER_DEFAULT_MODEL:-meta-llama/llama-4-maverick:free}
       - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY:-}
       - GOOGLE_SEARCH_ENGINE_ID=${GOOGLE_SEARCH_ENGINE_ID:-}
+      - GOOGLE_SEARCH_MAX_RESULTS=${GOOGLE_SEARCH_MAX_RESULTS:-5}
       - WEATHER_API_KEY=${WEATHER_API_KEY:-}
     depends_on:
       - backend

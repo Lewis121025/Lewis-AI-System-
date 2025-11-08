@@ -27,7 +27,7 @@ def get_redis_connection(url: Optional[str] = None) -> redis.Redis:
     if redis_url not in _REDIS_CONN:
         try:
             _REDIS_CONN[redis_url] = redis.Redis.from_url(
-                redis_url, decode_responses=True
+                redis_url, decode_responses=False
             )
             # 测试连接
             _REDIS_CONN[redis_url].ping()

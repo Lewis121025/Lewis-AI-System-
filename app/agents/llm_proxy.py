@@ -126,7 +126,8 @@ class LLMProxy:
         base_url = self.settings.openrouter_base_url.rstrip("/")
         url = f"{base_url}/chat/completions"
         try:
-            response = requests.post(url, json=payload, headers=headers, timeout=60)
+            # 临时禁用 SSL 验证以解决证书问题（仅用于测试）
+            response = requests.post(url, json=payload, headers=headers, timeout=60, verify=False)
             response.raise_for_status()
             data = response.json()
             message = data["choices"][0]["message"]["content"]

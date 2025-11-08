@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 from typing import Any, Dict, List
 
@@ -1131,8 +1132,12 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
     
-    api_base = st.text_input("🌐 Backend URL", value="http://localhost:8002")
-    api_token = st.text_input("🔑 API Token", value="change-me", type="password")
+    # 从环境变量读取配置，如果在Docker中运行则使用容器间通信
+    default_backend_url = os.getenv("BACKEND_URL", "http://localhost:8002")
+    default_api_token = os.getenv("API_TOKEN", "change-me")
+    
+    api_base = st.text_input("🌐 Backend URL", value=default_backend_url)
+    api_token = st.text_input("🔑 API Token", value=default_api_token, type="password")
     sync_mode = st.checkbox("⏱️ Sync Mode", value=False, help="Wait for task completion (may timeout for long tasks)")
     poll_interval = st.slider("🔄 Refresh (sec)", 1, 10, 2)
     
